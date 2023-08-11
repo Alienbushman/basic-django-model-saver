@@ -9,8 +9,10 @@ class ModelUsedSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PredictedSerializer(serializers.ModelSerializer):
-    model_name = serializers.CharField(source='model.model_name')
+    # model_name = serializers.CharField(source='model.model_name')
     class Meta:
         model = Prediction
         # fields = ('id','prediction', 'model', 'model__model_name')
         fields = '__all__'
+
+    # def

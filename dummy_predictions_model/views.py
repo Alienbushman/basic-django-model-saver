@@ -42,8 +42,7 @@ class ModelUsedView(APIView):
         model_id = request.data.get('model_id', None)
         model_name = request.data.get('model_name', None)
 
-        #todo update model instead of just save
-
+        # todo update model instead of just save
 
         post_data = {
             'model_name': model_name
@@ -79,11 +78,31 @@ class ModelUsedView(APIView):
         response = {'message': f'unable to delete {model_id}'}
         return Response(response, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        request_body=ModelUsedSerializer)
+    def put(self, request):
+        model_name = request.data.get('model_name', None)
+
+        post_data = {
+            'model_name': model_name
+        }
+
+        serializer = self.serializer_class(data=post_data)
+        if serializer.is_valid(raise_exception=True):
+            model_used = serializer.save()
+
+            if model_used:
+                return Response({'message': 'Successful new model'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PredictionView(APIView):
     serializer_class = PredictedSerializer
 
+    @swagger_auto_schema(
+        title="Create a prediction",
+        operation_description='Get all the predictions'
+    )
     def get(self, request):
         predictions = Prediction.objects.all()
         prediction_serializer = self.serializer_class(predictions, many=True)
@@ -99,7 +118,7 @@ class PredictionView(APIView):
             prediction = Prediction.objects.create(model=model, prediction=prediction)
 
             serializer = self.serializer_class(prediction)
-            #todo do a check to see if should save
+            # todo do a check to see if should save
             serializer.is_valid()
             serializer.save()
             response = {'message': 'prediction created', 'result': serializer.data}
@@ -107,7 +126,8 @@ class PredictionView(APIView):
             return Response(response, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'model not found'}, status=status.HTTP_200_OK)
-#todo consider using a method for the delte instead of using the built in status
+
+    # todo consider using a method for the delete instead of using the built in status
     @swagger_auto_schema(
         # methods=['delete'],
         request_body=openapi.Schema(
@@ -144,4 +164,4 @@ class PredictionView(APIView):
 
         response = {'message': 'No prediction found to delete'}
         return Response(response)
-    #todo consider putting a update function
+    # todo consider putting a update function
